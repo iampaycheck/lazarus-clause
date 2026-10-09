@@ -20,12 +20,16 @@
   placeholders, with tracking notes; and E4 and the downed-lock row reworded as open questions rather than
   expected failures.
 - **Still to verify:**
-  - [#9] license, asset and export terms (R9, R10);
+  - [#9] owner decision on license, asset and export terms (R9, R10);
   - [#10] load and integration experiment (E1–E6);
   - [#14] owner playtest;
   - [#15] server performance.
 - **Gates:** [#9] and a passing E1 in [#10] gate pack integration ([#12], which also needs the [#4] baseline)
   and gun art ([#16]). [#11] is needed only if E4 in [#10] finds a downed player can fire.
+- **R9/R10 research checkpoint (2026-10-09):** see [TaCZ license, assets and export terms](tacz-license-terms.md).
+  The separate CurseForge port project and r7 file are verified [S24]. Code license, asset statements,
+  source dependencies and format-specific exports are documented; exact asset scope, explicit author
+  modpack permission and a fully independent custom pack remain unanswered. Owner acceptance is pending.
 - **Centrifuge brain record:** prepared, not yet recorded. The brain writer refused it because its map census
   does not list a `lazarus-clause` project yet; details are in the closeout PR.
 
@@ -54,11 +58,12 @@ Its NeoForge 1.21.1 build is listed on Modrinth; it has not been loaded on NeoFo
   guns a content job rather than a fork, which suits the pack's "original art, no Bungie assets" rule.
 - It lists no mandatory dependencies [S6], has public GPL-3.0 code [S7] we can read and hook, and lists
   attachments with workbench crafting [S6].
-- Tradeoffs: it is an **unofficial port** (upstream TaCZ is Forge 1.20.1 only [S8][S9]). The release is
-  verified on Modrinth [S5]. The official TaCZ CurseForge page shows no NeoForge file [S9], so whether a
-  CurseForge export of the pack could include the port is **unverified**. Its asset metadata says
-  **CC BY-NC-ND 4.0** [S6]. What that allows for distribution, asset reuse and pack export has **not been
-  verified** (R9, R10), and this report draws no legal conclusion.
+- Tradeoffs: it is an **unofficial port** (upstream TaCZ is Forge 1.20.1 only [S8][S9]). The approved r7
+  release is listed on Modrinth [S5] and the separate CurseForge port project [S24]; cross-host byte
+  identity is unchecked. The imported original asset statement and default-pack metadata say
+  **CC BY-NC-ND 4.0**. [R9/R10 findings](tacz-license-terms.md) separate platform inclusion guidance,
+  reference/download exports, bundled server ZIPs and unresolved asset scope. Owner acceptance remains
+  pending; this report draws no legal conclusion.
 
 **Approved fallback: Superb Warfare (0.8.9.2, 2026-09-30 [S1]).** It is listed on both Modrinth and
 CurseForge, with GPL-3.0 code and a perk system [S2][S4]. It ranks second because its asset metadata says
@@ -75,9 +80,10 @@ open, hookable code the deciding factor.
 workspace with `pack/` untouched:
 1. **E1 load test ([#10]):** boot the GameTest server with Ghost Core and the port on NeoForge 21.1.256, and
    pass the existing 8 Ghost Core tests. This turns "listed" into "tested".
-2. **R9 and R10 license and export check ([#9]):** confirm what the port's terms allow for modpack inclusion,
-   asset reuse and Modrinth, CurseForge or server-pack export. It must finish before the port goes into
-   `pack/` ([#12]) or any gun art is commissioned ([#16]).
+2. **R9 and R10 license and export check ([#9]):** read the [source report](tacz-license-terms.md) and record
+   separate owner decisions for pack inclusion/distribution and original gun packs. Research is ready;
+   unanswered scope/permission/dependency questions are listed. The gate remains before the port goes
+   into `pack/` ([#12]) or any gun art is commissioned ([#16]).
 3. **E4 downed-fire test (with R2, [#10]):** find out whether a downed player can still fire. A failure does
    not rule out the direction; it starts Ghost Core follow-up [#11].
 
@@ -97,7 +103,7 @@ workspace with `pack/` untouched:
 
 | Mod | Version (date) | Code / asset license | Required deps | Source code | Ecosystem (listed for 1.21.1 NeoForge) | Fit notes |
 |---|---|---|---|---|---|---|
-| **TaCZ NeoForge port** (unofficial) | 1.1.8-hotfix-r7 (2026-10-01) [S5] | GPL-3.0 code; asset metadata CC BY-NC-ND 4.0 [S6][S7]; permissions unverified | None mandatory; Cloth Config for data JSON [S6] | Yes, MUKSC/TACZ-1.21.1 [S7] | TACZ Turrets (MIT), TACZ Durability (GPL-3.0, jamming), Tactical Breaching (GPL-3.0), Elite X Quality Guns (ARR), Fallout gunpack port (ARR), ViewModel Tuner (ARR) [S20] | Gun packs as `.zip`, attachment UI, workbench crafting [S6]. Release verified on Modrinth; the official TaCZ CurseForge page lists Forge 1.20.1 only [S9], so CurseForge export is unverified. 1.20.1 worlds are incompatible (irrelevant for a new pack). |
+| **TaCZ NeoForge port** (unofficial) | 1.1.8-hotfix-r7 (2026-10-01) [S5][S24] | GPL-3.0-only Modrinth code metadata; imported asset statement and default-pack metadata CC BY-NC-ND 4.0; scope/owner acceptance pending ([report](tacz-license-terms.md)) | None mandatory; Cloth Config for data JSON [S6] | Yes, MUKSC/TACZ-1.21.1 [S7] | TACZ Turrets (MIT), TACZ Durability (GPL-3.0, jamming), Tactical Breaching (GPL-3.0), Elite X Quality Guns (ARR), Fallout gunpack port (ARR), ViewModel Tuner (ARR) [S20] | Gun packs as `.zip`, attachment UI, workbench crafting [S6]. Separate CurseForge port verified [S24]; byte identity and exact export contents unchecked. See [R9/R10](tacz-license-terms.md) for routes and limits. 1.20.1 worlds are incompatible (irrelevant for a new pack). |
 | **Superb Warfare** | 0.8.9.2 (2026-09-30) [S1] | GPL-3.0-only code; asset metadata ARR [S2] | Kotlin for Forge, GeckoLib, Curios, Cloth Config, Patchouli, geckoanimfix, plus one unresolved; required vs optional unconfirmed [S22] | Repo exists [S3]; README still describes Forge 1.20.1, 1.21.1 branch unconfirmed | SBW Mini Auto Turret, Block Expansion [S20] | Perks; block destruction on by default (`explosion_destroy` config); not Arclight-compatible [S2]. On CurseForge too [S4]. |
 | **Vic's Point Blank** | 2.2.0 (2026-09-11) [S10] | ARR [S11] | None listed [S11] | No public repo | Cyberpunk 2077 Guns (ARR; a 1.20.1 build listed for 1.21.1) [S21] | About 40 guns, fire modes, reload/inspect animations, accuracy changes while moving and aiming [S11]. CurseForge shows only a Fabric 1.21.1 file [S12]. |
 | **BlockFront** | 0.9.0.41b (2026-10-08) [S13] | ARR [S13] | None listed | No public repo | Not checked | Guns, explosives, vehicles. Feature detail and CurseForge not checked. |
@@ -118,7 +124,7 @@ workspace with `pack/` untouched:
 | Server performance | No verified data; no reports found | No verified data; no reports found | No verified data; no reports found |
 | Sci-fi fit | No sci-fi guns found. Custom gun packs are the route to an original Company arsenal [S6][S20], subject to R9 | No sci-fi guns found; asset metadata ARR [S2], reuse permission unverified | The only sci-fi-adjacent content found is an IP-branded Cyberpunk 2077 pack [S21], which conflicts with the original-content rule |
 | Hookability for our rarity, ammo and downed layers | Best: GPL source [S7] and data-driven stats [S6] | Medium: GPL, but the 1.21.1 source is unconfirmed [S3] | Poor: closed source |
-| Hosting (verified) | Modrinth [S5]; CurseForge export unverified [S9] | Modrinth and CurseForge [S2][S4] | NeoForge on Modrinth; CurseForge page showed only Fabric [S12] |
+| Hosting (verified) | Modrinth [S5]; separate CurseForge port [S24]. Export behavior/limits in [R10](tacz-license-terms.md) | Modrinth and CurseForge [S2][S4] | NeoForge on Modrinth; CurseForge page showed only Fabric [S12] |
 
 **Why not a combination?** Two gun mods would mean two ammo systems, two HUDs, two sets of keybinds and two
 balance passes. One platform plus addons from its own ecosystem (for example TACZ Turrets later) keeps the
@@ -168,13 +174,15 @@ and the "What the code does" column of the Ghost Core table.
   is unproven until E1.
 - *Maintenance:* the TaCZ port is unofficial (MUKSC/TACZ-1.21.1 [S7]) and upstream has no NeoForge build to
   fall back on [S8]. GPL-3.0 means we could fork it if it stalls, but that would be real work.
-- *License, distribution and export:* none of the checked pages states modpack permission. The TaCZ port's
-  asset metadata says CC BY-NC-ND 4.0, and Superb Warfare's says ARR. What those terms allow for our
-  distribution, asset reuse and export (packwiz or Modrinth pack, CurseForge zip, server pack) is unverified
-  (R9, R10). This report gives no legal conclusion. JEG New's GPL-2.0 vs GPL-3.0 conflict and Scorched Guns'
-  asset license are also unresolved.
-- *Hosting:* the TaCZ port release is verified on Modrinth, which is where it was found. Whether a
-  CurseForge edition of the pack could include it is unverified, not ruled out.
+- *License, distribution and export:* [R9/R10 research](tacz-license-terms.md) records GPLv3 code, broad
+  imported CC BY-NC-ND 4.0 asset statements and matching default-pack metadata, with exact file scope
+  unresolved. No explicit author modpack statement was located; Modrinth supplies separate hosted-file
+  guidance. Format capabilities do not settle permissions. Owner decisions remain pending, and this
+  report gives no legal conclusion. Superb Warfare's ARR asset metadata, JEG New's GPL-2.0 vs GPL-3.0
+  conflict and Scorched Guns' asset license remain unresolved.
+- *Hosting:* the separate CurseForge TaCZ port project and NeoForge 1.21.1 r7 file are now verified [S24].
+  A client manifest route exists in the documentation; byte identity, exact exporter metadata/contents
+  and submission acceptance are unchecked. See [format-specific findings](tacz-license-terms.md).
 - *IP:* the only sci-fi-adjacent content found is a Cyberpunk 2077 gun pack [S21], and the TaCZ ecosystem
   includes a Fallout gunpack port [S20]. Both are third-party IP, which the publishable-pack rule should treat
   the same way as Bungie's.
@@ -237,6 +245,11 @@ These would firm up the recommendation before or during the experiment:
   and whether a Modrinth pack, a CurseForge pack export or a server pack would reference or bundle the jar.
   Is there a separate CurseForge project for the port? Report what the sources say; do not conclude legality.
 
+**R9/R10 findings (2026-10-09):** [the sourced report](tacz-license-terms.md) answers these to the extent
+sources support, pins code/resource paths, corrects CurseForge hosting and distinguishes references from
+copied files. A fully independent custom pack, exact asset scope and explicit author inclusion permission
+remain unanswered. No owner distribution or gun-pack acceptance has been recorded by this research.
+
 **Where these are tracked:** R9 and R10 in [#9]. R2 in [#10] (fire path and damage types) and [#13]. R3 and
 R5 in [#13]. R1 in [#12]. [#15] measures performance directly instead of relying on R6. R4, R7 and R8 have no
 issue; [#14] checks key conflicts in play.
@@ -276,6 +289,7 @@ Checked by `mod-scout` on 2026-10-09 (raw notes: `.gradle/issue3/mod-scout-repor
 - [S3] GitHub, Superb Warfare: <https://github.com/Mercurows/SuperbWarfare>
 - [S4] CurseForge, Superb Warfare: <https://www.curseforge.com/minecraft/mc-mods/superb-warfare>
 - [S5] Modrinth API, TaCZ port versions: <https://api.modrinth.com/v2/project/tacz-1.21.1/version?loaders=%5B%22neoforge%22%5D&game_versions=%5B%221.21.1%22%5D>
+  (exact approved r7: <https://api.modrinth.com/v2/version/62q6mB5Q>)
 - [S6] Modrinth, TaCZ port: <https://modrinth.com/mod/tacz-1.21.1> (project API: <https://api.modrinth.com/v2/project/tacz-1.21.1>)
 - [S7] GitHub, TaCZ NeoForge port: <https://github.com/MUKSC/TACZ-1.21.1>
 - [S8] GitHub, official TaCZ (Forge 1.20.1): <https://github.com/MCModderAnchor/TACZ>
@@ -294,6 +308,8 @@ Checked by `mod-scout` on 2026-10-09 (raw notes: `.gradle/issue3/mod-scout-repor
 - [S21] Modrinth API, Cyberpunk 2077 Guns for Vic's: <https://api.modrinth.com/v2/project/cyberpunk-2077-guns-for-vics-point-blank/version?loaders=%5B%22neoforge%22%5D&game_versions=%5B%221.21.1%22%5D>
 - [S22] Modrinth API dependency projects: [GeckoLib](https://api.modrinth.com/v2/project/8BmcQJ2H), [Curios](https://api.modrinth.com/v2/project/vvuO3ImH), [Kotlin for Forge](https://api.modrinth.com/v2/project/ordsPcFz), [Cloth Config](https://api.modrinth.com/v2/project/9s6osm5g), [Patchouli](https://api.modrinth.com/v2/project/nU0bVIaL), [geckoanimfix](https://api.modrinth.com/v2/project/TbriQCWD), [Iguana Lib](https://api.modrinth.com/v2/project/5axv9QEo)
 - [S23] CurseForge search result, Orbital Railgun (unverified): <https://www.curseforge.com/minecraft/mc-mods/orbital-railgun-neoforge-1-21-1>
+- [S24] Separate CurseForge TaCZ port by MUKSC (checked 2026-10-09): <https://www.curseforge.com/minecraft/mc-mods/tacz-1-21-1>;
+  r7 / NeoForge 1.21.1 file: <https://www.curseforge.com/minecraft/mc-mods/tacz-1-21-1/files/9027337>.
 
 [#4]: https://github.com/iampaycheck/lazarus-clause/issues/4
 [#9]: https://github.com/iampaycheck/lazarus-clause/issues/9
