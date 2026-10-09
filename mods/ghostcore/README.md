@@ -58,6 +58,10 @@ KubeJS can hook the same event through `NativeEvents`. All player-facing text is
 
 Windows note: keep the project in a short path, such as `C:\dev\ghostcore`. NeoForge's setup step launches processes whose working directory sits deep inside `build/`, and Windows refuses working directories longer than 260 characters.
 
+The optional [TaCZ compatibility experiment](../../docs/tacz-compat-experiment.md)
+adds six dev-only GameTests with `-PtaczExperiment=true`. It has known failing
+compatibility checks; normal builds and the published jar exclude the experiment.
+
 ### Layout
 
 ```
