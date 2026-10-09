@@ -166,9 +166,13 @@ metadata declares no dependency.
   input in `Post`. It sets `ShootKey.SHOOT_KEY` up, clears `controllerShootDown` through
   `ShootKey.shootControllerTick(false)`, and empties the local `chargeProgress`/`isCharging`.
   With the key up and no charge, `chargeShoot` returns false for auto, hold and delay
-  charge, so `shoot()` and `preCheck` never run. The result is no dry-fire click, no
-  input bolt, no fire packet, no animation, no shot sound and no recoil. The client
-  `GunShootEvent`/`GunFireEvent` are also cancelled for the local player, as a backstop.
+  charge, so `shoot()` never runs. For a charge-enabled gun, `chargeShoot(false)` still
+  evaluates `preCheck` whenever cooldown allows charging, but with `playDrySound` false,
+  so it plays no dry-fire click. The bundled charged revolvers are `open_bolt`, so that
+  check can't bolt them either (see the manual-action limit below). For the bundled guns
+  the result is no dry-fire click, no input bolt, no fire packet, no animation, no shot
+  sound and no recoil. The client `GunShootEvent`/`GunFireEvent` are also cancelled for
+  the local player, as a backstop.
 - **Revive.** Suppression lifts when the `downedUntil = 0` sync arrives; logout resets
   it. A trigger held through the downed state must be pressed again, because vanilla only
   sets mouse keys on a press. Queued charge is already gone, so nothing fires by itself
