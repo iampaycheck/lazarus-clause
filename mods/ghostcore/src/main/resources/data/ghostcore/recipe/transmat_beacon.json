@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "E": { "item": "minecraft:ender_pearl" },
+    "G": { "item": "minecraft:glowstone_dust" },
+    "I": { "item": "minecraft:iron_ingot" },
+    "B": { "item": "minecraft:iron_block" }
+  },
+  "pattern": [" E ", "IGI", "IBI"],
+  "result": { "count": 1, "id": "ghostcore:transmat_beacon" }
+}

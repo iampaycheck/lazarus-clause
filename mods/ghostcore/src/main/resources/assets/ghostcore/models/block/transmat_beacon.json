@@ -1,0 +1,43 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "ghostcore:block/transmat_beacon_base_top",
+    "base_top": "ghostcore:block/transmat_beacon_base_top",
+    "base_side": "ghostcore:block/transmat_beacon_base_side",
+    "pillar": "ghostcore:block/transmat_beacon_pillar",
+    "cap": "ghostcore:block/transmat_beacon_cap"
+  },
+  "elements": [
+    {
+      "from": [1, 0, 1], "to": [15, 3, 15],
+      "faces": {
+        "down":  { "uv": [1, 1, 15, 15], "texture": "#base_top", "cullface": "down" },
+        "up":    { "uv": [1, 1, 15, 15], "texture": "#base_top" },
+        "north": { "uv": [1, 0, 15, 3], "texture": "#base_side" },
+        "south": { "uv": [1, 0, 15, 3], "texture": "#base_side" },
+        "west":  { "uv": [1, 0, 15, 3], "texture": "#base_side" },
+        "east":  { "uv": [1, 0, 15, 3], "texture": "#base_side" }
+      }
+    },
+    {
+      "from": [5, 3, 5], "to": [11, 11, 11],
+      "faces": {
+        "north": { "uv": [5, 4, 11, 12], "texture": "#pillar" },
+        "south": { "uv": [5, 4, 11, 12], "texture": "#pillar" },
+        "west":  { "uv": [5, 4, 11, 12], "texture": "#pillar" },
+        "east":  { "uv": [5, 4, 11, 12], "texture": "#pillar" }
+      }
+    },
+    {
+      "from": [3, 11, 3], "to": [13, 13, 13],
+      "faces": {
+        "down":  { "uv": [3, 3, 13, 13], "texture": "#pillar" },
+        "up":    { "uv": [3, 3, 13, 13], "texture": "#cap" },
+        "north": { "uv": [3, 0, 13, 2], "texture": "#pillar" },
+        "south": { "uv": [3, 0, 13, 2], "texture": "#pillar" },
+        "west":  { "uv": [3, 0, 13, 2], "texture": "#pillar" },
+        "east":  { "uv": [3, 0, 13, 2], "texture": "#pillar" }
+      }
+    }
+  ]
+}

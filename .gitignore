@@ -1,0 +1,16 @@
+# Gradle / build output
+.gradle/
+build/
+out/
+
+# Dev runs (worlds, logs, options)
+run/
+
+# IDEs / OS
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+.DS_Store
+Thumbs.db
