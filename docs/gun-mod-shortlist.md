@@ -20,7 +20,8 @@
   placeholders, with tracking notes; and E4 and the downed-lock row reworded as open questions rather than
   expected failures.
 - **Still to verify:**
-  - [#9] owner decision on license, asset and export terms (R9, R10);
+  - [#9] recorded owner limits on license, asset and export terms (R9, R10), with route verification
+    and no-default-pack-resource proof still required before publishing;
   - [#10] load and integration experiment (E1–E6);
   - [#14] owner playtest;
   - [#15] server performance.
@@ -29,7 +30,9 @@
 - **R9/R10 research checkpoint (2026-10-09):** see [TaCZ license, assets and export terms](tacz-license-terms.md).
   The separate CurseForge port project and r7 file are verified [S24]. Code license, asset statements,
   source dependencies and format-specific exports are documented; exact asset scope, explicit author
-  modpack permission and a fully independent custom pack remain unanswered. Owner acceptance is pending.
+  modpack permission and a fully independent custom pack remain unanswered. Two owner answers were recorded
+  on 2026-10-09: accept documented terms/unknowns for packwiz or Modrinth download references, defer bundled
+  server ZIPs, and approve original files only with no default-pack resource dependency proved before publishing.
 - **Centrifuge brain record:** prepared, not yet recorded. The brain writer refused it because its map census
   does not list a `lazarus-clause` project yet; details are in the closeout PR.
 
@@ -62,8 +65,10 @@ Its NeoForge 1.21.1 build is listed on Modrinth; it has not been loaded on NeoFo
   release is listed on Modrinth [S5] and the separate CurseForge port project [S24]; cross-host byte
   identity is unchecked. The imported original asset statement and default-pack metadata say
   **CC BY-NC-ND 4.0**. [R9/R10 findings](tacz-license-terms.md) separate platform inclusion guidance,
-  reference/download exports, bundled server ZIPs and unresolved asset scope. Owner acceptance remains
-  pending; this report draws no legal conclusion.
+  reference/download exports, bundled server ZIPs and unresolved asset scope. The owner's 2026-10-09
+  acceptance/direction is limited to packwiz or Modrinth download references and original files with
+  no default-pack resource dependency proved before publishing; bundled server ZIPs are deferred.
+  This report draws no legal conclusion and records no authors' permission.
 
 **Approved fallback: Superb Warfare (0.8.9.2, 2026-09-30 [S1]).** It is listed on both Modrinth and
 CurseForge, with GPL-3.0 code and a perk system [S2][S4]. It ranks second because its asset metadata says
@@ -80,10 +85,11 @@ open, hookable code the deciding factor.
 workspace with `pack/` untouched:
 1. **E1 load test ([#10]):** boot the GameTest server with Ghost Core and the port on NeoForge 21.1.256, and
    pass the existing 8 Ghost Core tests. This turns "listed" into "tested".
-2. **R9 and R10 license and export check ([#9]):** read the [source report](tacz-license-terms.md) and record
-   separate owner decisions for pack inclusion/distribution and original gun packs. Research is ready;
-   unanswered scope/permission/dependency questions are listed. The gate remains before the port goes
-   into `pack/` ([#12]) or any gun art is commissioned ([#16]).
+2. **R9 and R10 license and export check ([#9]):** read the [source report](tacz-license-terms.md), including
+   the two separate owner decisions recorded on 2026-10-09. Unanswered scope/permission/dependency questions
+   remain listed. No default-file copying/reuse is approved; the TaCZ jar's engine dependency may remain.
+   Route verification and original-pack proof remain publication gates; the separate E1 networking
+   integration failure still blocks [#12] and [#16]. The decisions do not unconditionally unblock either.
 3. **E4 downed-fire test (with R2, [#10]):** find out whether a downed player can still fire. A failure does
    not rule out the direction; it starts Ghost Core follow-up [#11].
 
@@ -177,8 +183,9 @@ and the "What the code does" column of the Ghost Core table.
 - *License, distribution and export:* [R9/R10 research](tacz-license-terms.md) records GPLv3 code, broad
   imported CC BY-NC-ND 4.0 asset statements and matching default-pack metadata, with exact file scope
   unresolved. No explicit author modpack statement was located; Modrinth supplies separate hosted-file
-  guidance. Format capabilities do not settle permissions. Owner decisions remain pending, and this
-  report gives no legal conclusion. Superb Warfare's ARR asset metadata, JEG New's GPL-2.0 vs GPL-3.0
+  guidance. Format capabilities do not settle permissions. The [recorded owner decisions](tacz-license-terms.md)
+  accept a limited project direction with publication gates; this report gives no legal conclusion or
+  authors' permission. Superb Warfare's ARR asset metadata, JEG New's GPL-2.0 vs GPL-3.0
   conflict and Scorched Guns' asset license remain unresolved.
 - *Hosting:* the separate CurseForge TaCZ port project and NeoForge 1.21.1 r7 file are now verified [S24].
   A client manifest route exists in the documentation; byte identity, exact exporter metadata/contents
@@ -248,7 +255,8 @@ These would firm up the recommendation before or during the experiment:
 **R9/R10 findings (2026-10-09):** [the sourced report](tacz-license-terms.md) answers these to the extent
 sources support, pins code/resource paths, corrects CurseForge hosting and distinguishes references from
 copied files. A fully independent custom pack, exact asset scope and explicit author inclusion permission
-remain unanswered. No owner distribution or gun-pack acceptance has been recorded by this research.
+remain unanswered. The owner's two separate 2026-10-09 answers and their limits are now recorded in the
+linked report and on [#9]; they do not resolve those unanswered questions or the E1 networking blocker.
 
 **Where these are tracked:** R9 and R10 in [#9]. R2 in [#10] (fire path and damage types) and [#13]. R3 and
 R5 in [#13]. R1 in [#12]. [#15] measures performance directly instead of relying on R6. R4, R7 and R8 have no

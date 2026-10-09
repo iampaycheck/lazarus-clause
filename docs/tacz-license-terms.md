@@ -1,15 +1,17 @@
 # TaCZ port: license, assets and export terms (R9 / R10)
 
-**Checked: 2026-10-09. Research ready; owner decision pending on [#9](https://github.com/iampaycheck/lazarus-clause/issues/9).**
+**Checked: 2026-10-09. Two owner decisions recorded on 2026-10-09 for [#9](https://github.com/iampaycheck/lazarus-clause/issues/9); scope and remaining gates below.**
 This report documents source statements and format behavior. It makes no legal conclusion, grants no
 distribution approval, and does not establish that an independent custom gun pack loads successfully.
 The [shortlist](gun-mod-shortlist.md) approved prototyping only. Pack inclusion ([#12](https://github.com/iampaycheck/lazarus-clause/issues/12))
-and original gun packs ([#16](https://github.com/iampaycheck/lazarus-clause/issues/16)) still await the owner.
+and original gun packs ([#16](https://github.com/iampaycheck/lazarus-clause/issues/16)) remain subject to the
+recorded limits, later verification and the separate E1 networking integration blocker.
 
 ## Confirmed findings and their limits
 
 - Code and assets have separate statements: GPLv3 code; CC BY-NC-ND 4.0 assets in the imported original
-  README and the Modrinth description; the bundled default pack declares that same asset license.
+  README and the Modrinth description; the bundled default pack has a pack-level `license` field
+  declaring `CC BY-NC-ND 4.0`.
   These statements do not supply a file-by-file scope map. [Pinned README][readme], [LICENSE][license],
   [default-pack metadata][metadata], [Modrinth project API][mr-project].
 - A **separate CurseForge port project exists**, owned by MUKSC and linked to the same source repository.
@@ -63,8 +65,9 @@ decide whether an intended use is an adaptation, commercial use, or permitted di
 no checked gun-display validation requires copying the default display JSON. **Still unanswered:** a
 complete, functioning pack without any default-pack resources has not been demonstrated, nor has a
 runtime independent of all TaCZ jar assets. The [official guide][wiki] describes cross-pack references
-and discourages reusing the `tacz` namespace for one's own pack. That documents a mechanism, not asset
-reuse permission. Its source is also [pinned at `a44ab82757c0599e3c89bdd8b2fea1c6e04e0ae8`][wiki-pin],
+and says not to reuse existing namespaces such as `tacz` for one's own pack, with exceptions for refit
+packs. That documents a mechanism, not asset reuse permission. Its source is also
+[pinned at `a44ab82757c0599e3c89bdd8b2fea1c6e04e0ae8`][wiki-pin],
 path `docs/zh/gunpack/02_first_pack.md`; it is general upstream guidance, not a port load result.
 
 ### What the bounded source reads establish
@@ -79,7 +82,7 @@ Java paths below are relative to `src/main/java/com/tacz/guns/` at the port comm
 | Animation | [Display loader][display-loader], `checkAnimation`, accepts omission; supplied IDs must resolve. `default_animation` or `use_default_animation` adds fallback animations. | Own IDs can be supplied. Default fallback use references runtime resources; it does not copy them into the custom ZIP. |
 | State machine | [Display loader][display-loader] falls back to `tacz:default_state_machine` if omitted and throws if the script is absent. | Own script ID can be supplied. Omission introduces a default-pack dependency. |
 | Third-person / sounds | [Display loader][display-loader] defaults third-person player animation to `tacz:rifle_default.player_animation`; a nonempty sound map receives missing TaCZ sound entries. | Explicit original replacements need an audit; these defaults are dependencies without copied files. |
-| Engine animation resources | [`client/event/ReloadResourceEvent.java`][reload] calls [`InternalAssetLoader.onResourceReload`][internal-loader]. It loads jar-level pistol/rifle animations through Minecraft's resource manager regardless of a gun's fallback choice. | Omitting per-gun fallback does not stop engine loading. Replacing resources at those IDs would be a separate, untested resource override; no independence claim follows. |
+| Engine animation and model resources | [`client/event/ReloadResourceEvent.java`][reload] calls [`InternalAssetLoader.onResourceReload`][internal-loader]. It loads jar-level pistol/rifle animations and bedrock models (smith table, target, target minecart, bullet, statue) through Minecraft's resource manager regardless of a gun's fallback choice. | Omitting per-gun fallback does not stop engine loading. Replacing resources at those IDs would be a separate, untested resource override; no independence claim follows. |
 | Shaders | [Checked display schema][display-pojo] has no per-gun shader field. | No mandatory shader-copy requirement was established. A working override of engine shaders/resources, or removing their dependence, remains unverified. |
 
 ### Concrete resource locations
@@ -95,12 +98,12 @@ references do not resolve which license covers an individual file.
 
 [`GunMod.registerDefaultExtraGunPack`][gunmod] registers the jar's default-pack directory through
 [`ResourceManager.registerExportResource`][resource-manager]. [GunPackLoader][pack-loader] copies registered
-directories to the game `tacz/` directory on its first discovery unless
+directories to the game `tacz/` directory on the first discovery in each game start unless
 [`gunpack.DefaultPackDebug`][preload] is true (default false). The [bundled README][pack-readme] describes
 preventing overwrite and backups. This is an extraction/overwrite control, not demonstrated complete
 disabling of default content: existing files can still be discovered, and jar-level assets remain.
 
-Practical bounded custom-pack routes for a later owner-approved task:
+Technical custom-pack routes described by the evidence (the owner-approved direction is below):
 
 - **Original files with explicit cross-pack dependencies:** author original display/data/model/texture/
   animation/script files and list every TaCZ ID used at runtime. This avoids assuming that a ZIP with no
@@ -147,22 +150,30 @@ route and does not turn a manifest ZIP into the manual server ZIP described abov
 | CurseForge r7 byte identity and exporter metadata mapping | Download/digest comparison with Modrinth r7, then inspect generated manifest/overrides with exact project/file IDs. The filename/date match alone is insufficient. |
 | Route-specific publication acceptance / distribution settings | Actual project setting evidence and the chosen export's contents; server ZIP acceptance cannot be inferred from client profile rules. |
 
-## Owner decision requested on #9
+## Owner decisions recorded for #9 — 2026-10-09
 
-Record **two separate answers**, with any limits, after reading these findings:
+The owner supplied **two separate answers** on 2026-10-09, recorded here and in the
+[issue #9 owner-decision record](https://github.com/iampaycheck/lazarus-clause/issues/9#issuecomment-6077245313):
 
-1. **Pack inclusion / distribution:** accept this exact port as the candidate for integration and specify
-   which route(s) are acceptable to pursue (Modrinth download references, hosted packwiz downloads,
-   CurseForge client manifest, and/or a concrete server route); **defer** pending named scope/permission/
-   export evidence; or **switch direction to Superb Warfare**, whose own terms still need review.
-2. **Original Company gun packs:** accept an original pack with explicitly listed TaCZ runtime references;
-   accept only a pack with no default-pack resource dependency, contingent on a later proof; **defer**
-   pending scope/permission/dependency evidence; or **switch direction**. Specify whether any reuse of
-   default files is accepted as a project direction; no reuse is approved by this report.
+1. **Pack inclusion / distribution:** "Accept the documented terms/unknowns for packwiz or Modrinth download references; defer bundled server ZIPs"
+   This accepts the documented terms and unresolved questions as the project direction for the exact
+   r7 target above, limited to packwiz or Modrinth download references. Verify the eventual manifest,
+   metadata and overrides actually preserve that route before publishing. Bundled server ZIPs are
+   deferred; CurseForge export acceptance, cross-host byte identity, exporter metadata mapping and
+   the project's actual `allowModDistribution` value remain unresolved and are not approved by this answer.
+2. **Original Company gun packs:** "Approve original files only; prove no default-pack resource dependency before publishing"
+   Only original files are approved as the project direction. No copying or reusing default-pack files
+   is approved. Before publishing, prove no direct or indirect default-pack resource dependencies with
+   an inventory/dependency audit and separate client/resource and server loading evidence with extracted
+   defaults absent and extraction prevented. A ZIP with no copied files alone is insufficient. The TaCZ
+   jar's engine dependency is distinct and may remain; independence from all jar-level resources is not
+   required by this answer and has not been demonstrated.
 
-These project decisions may differ (for example, accept the inclusion direction and defer gun art).
-They are not a legal verdict. Prototype approval is not either answer. Keep the PR draft and the owner
-acceptance criterion unchecked until the concrete decision is recorded and closeout is routed.
+These are owner acceptance/direction, **not legal verdicts or authors' permission**. Exact asset-license
+scope and explicit author modpack statements remain unanswered. This records the #9 owner decision
+criterion; it does not unconditionally unblock #12 or #16. Their separate E1 networking integration
+failure remains a blocker, alongside the route verification and original-pack proof required above.
+PR #20 can proceed to owner review after the documentation closeout and green final CI; the owner merges.
 
 ## Primary sources
 
