@@ -53,6 +53,11 @@ public record GhostSyncPayload(
                 data.beacon);
     }
 
+    /** True while the player is downed. The HUD overlay and the client's TaCZ fire guard both read this. */
+    public boolean isDowned() {
+        return downedUntil > 0;
+    }
+
     private void write(FriendlyByteBuf buf) {
         buf.writeBoolean(bound);
         buf.writeVarInt(charges);

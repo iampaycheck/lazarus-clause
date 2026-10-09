@@ -30,6 +30,7 @@ These rules apply to every agent and model (Claude Code reads them through `CLAU
 - In 21.1.256, `makeMockServerPlayerInLevel()` hardcodes `isCreative()` to true: `setGameMode(SURVIVAL)` alone does not enable survival ammo consumption. Construct a survival `ServerPlayer` for ammo tests; record any login bypass separately from compatibility results.
 - `RenderLevelStageEvent` (1.21.1): set the model-view matrix yourself before drawing (see `ScanHighlights`).
 - `pack/**` is LF-only, because packwiz hashes break on CRLF.
+- TaCZ is optional: main code never imports `com.tacz`. `compat/TaczCompat` and `client/TaczClientGuard` look port members up by name; when you change them, update the experiment's `GuardContract` and run `-PtaczExperiment=true build runGameTestServer`.
 
 ## Brain
 Decisions and lessons that outlive this repo go to centrifuge under `projects/lazarus-clause/`, through its brain-writer. Never edit the brain directly.

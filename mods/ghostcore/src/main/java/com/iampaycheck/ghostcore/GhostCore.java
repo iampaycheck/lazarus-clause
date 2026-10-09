@@ -1,5 +1,6 @@
 package com.iampaycheck.ghostcore;
 
+import com.iampaycheck.ghostcore.compat.TaczCompat;
 import com.iampaycheck.ghostcore.network.GhostNetwork;
 import com.iampaycheck.ghostcore.registry.ModAttachments;
 import com.iampaycheck.ghostcore.registry.ModBlocks;
@@ -30,6 +31,7 @@ public class GhostCore {
         ModAttachments.ATTACHMENTS.register(modBus);
         ModCreativeTab.TABS.register(modBus);
         modBus.addListener(GhostNetwork::register);
+        TaczCompat.register();
 
         container.registerConfig(ModConfig.Type.SERVER, GhostConfig.SERVER_SPEC);
         container.registerConfig(ModConfig.Type.CLIENT, GhostConfig.CLIENT_SPEC);

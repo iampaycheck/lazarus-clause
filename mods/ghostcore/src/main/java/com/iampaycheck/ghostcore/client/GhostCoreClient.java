@@ -27,6 +27,7 @@ public class GhostCoreClient {
         NeoForge.EVENT_BUS.addListener(GhostKeys::onClientTick);
         NeoForge.EVENT_BUS.addListener(ScanHighlights::onRenderLevel);
         NeoForge.EVENT_BUS.addListener(GhostCoreClient::onLogout);
+        TaczClientGuard.register();
     }
 
     private static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {

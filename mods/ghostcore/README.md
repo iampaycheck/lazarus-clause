@@ -13,7 +13,7 @@ Inspired by Destiny's Ghost. The name and role are kept, but the lore, shell des
 | | What it does |
 |---|---|
 | **Companion** | A drone floats over your right shoulder and follows you smoothly. When it works, its shell spreads open and orbits its glowing lens. Other players can see it. |
-| **Resurrection** | Lethal damage leaves you *downed* instead of dead. For a few seconds you're rooted and invulnerable while the Ghost restores you. Each revive spends a charge (3 max, one regenerates every 5 min). With no charges left, death is real. Void, lava and suffocation deaths pull you back to the last safe ground you stood on. |
+| **Resurrection** | Lethal damage leaves you *downed* instead of dead. For a few seconds you're rooted and invulnerable while the Ghost restores you. Each revive spends a charge (3 max, one regenerates every 5 min). With no charges left, death is real. Void, lava and suffocation deaths pull you back to the last safe ground you stood on. If the optional TaCZ gun port is installed, a downed operator can't fire either. |
 | **Scan** (`G`) | A sonar ring sweeps outward and x-rays, through walls, **unlooted caches** (gold; containers that still have a loot table), **ore** (cyan, `c:ores` tag) and **hostiles** (red). |
 | **Light** (`K`) | In the dark, the Ghost carries an invisible light block with it. These light blocks delete themselves once no Ghost claims them, so crashes and chunk unloads never leave stray lights behind. |
 | **Transmat** (`H`) | Right-click a **Transmat Beacon** to link it. Press `H` and hold still for 3 s to teleport there, including across dimensions. Moving or taking damage cancels it. 5 min cooldown. |
@@ -59,8 +59,13 @@ KubeJS can hook the same event through `NativeEvents`. All player-facing text is
 Windows note: keep the project in a short path, such as `C:\dev\ghostcore`. NeoForge's setup step launches processes whose working directory sits deep inside `build/`, and Windows refuses working directories longer than 260 characters.
 
 The optional [TaCZ compatibility experiment](../../docs/tacz-compat-experiment.md)
-adds six dev-only GameTests with `-PtaczExperiment=true`. It has known failing
+adds seven dev-only GameTests with `-PtaczExperiment=true`. It has known failing
 compatibility checks; normal builds and the published jar exclude the experiment.
+
+TaCZ is never required. When it is loaded, `compat/TaczCompat` (server) and
+`client/TaczClientGuard` stop a downed player from firing. Both look the port up by
+name, so main code must not import `com.tacz`; the experiment's `GuardContract`
+compiles those names against the pinned port.
 
 ### Layout
 
@@ -69,6 +74,7 @@ ghost/      server logic: GhostManager (lifecycle + HUD sync), Resurrection, Sca
 client/     keys, HUD, scan x-ray renderer, Ghost model/renderer
 network/    payloads (key actions C→S, HUD sync + scan results S→C)
 api/        events for other mods / scripts
+compat/     optional integrations, loaded only when the other mod is (TaCZ downed-fire guard)
 gametest/   GameTests (arena: data/ghostcore/structure/platform.nbt)
 ```
 

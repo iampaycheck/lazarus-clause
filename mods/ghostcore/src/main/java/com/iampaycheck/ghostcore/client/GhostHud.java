@@ -33,7 +33,7 @@ public final class GhostHud {
         long now = mc.level.getGameTime();
         float partial = delta.getGameTimeDeltaPartialTick(false);
 
-        if (s.downedUntil() > 0) {
+        if (s.isDowned()) {
             g.fill(0, 0, g.guiWidth(), g.guiHeight(), 0x55300000);
             progressBar(g, mc.font, Component.translatable("ghostcore.hud.reviving"), g.guiHeight() / 2 - 30,
                     1F - (s.downedUntil() - now - partial) / s.reviveTotal());
@@ -53,8 +53,8 @@ public final class GhostHud {
         g.fill(x - 4, y - 4, x - 3, y + rows * line, ACCENT);
 
         g.drawString(font, Component.translatable("ghostcore.hud.title"), x, y, ACCENT, false);
-        Component status = Component.translatable(s.downedUntil() > 0 ? "ghostcore.hud.status.reviving" : "ghostcore.hud.status.linked");
-        g.drawString(font, status, x + width - 6 - font.width(status), y, s.downedUntil() > 0 ? WARN : DIM, false);
+        Component status = Component.translatable(s.isDowned() ? "ghostcore.hud.status.reviving" : "ghostcore.hud.status.linked");
+        g.drawString(font, status, x + width - 6 - font.width(status), y, s.isDowned() ? WARN : DIM, false);
 
         y += line;
         label(g, font, "ghostcore.hud.rez", x, y);

@@ -4,27 +4,37 @@ import com.iampaycheck.ghostcore.GhostCore;
 import com.iampaycheck.ghostcore.ghost.GhostData;
 import com.iampaycheck.ghostcore.ghost.GhostEntity;
 import com.iampaycheck.ghostcore.ghost.GhostManager;
+import com.iampaycheck.ghostcore.network.GhostSyncPayload;
 import com.tacz.guns.api.TimelessAPI;
 import com.tacz.guns.api.entity.IGunOperator;
 import com.tacz.guns.api.entity.ShootResult;
+import com.tacz.guns.api.event.common.GunFireEvent;
 import com.tacz.guns.api.item.IGun;
 import com.tacz.guns.api.item.attachment.AttachmentType;
 import com.tacz.guns.api.item.builder.GunItemBuilder;
 import com.tacz.guns.api.item.gun.FireMode;
 import com.tacz.guns.entity.EntityKineticBullet;
 import com.tacz.guns.init.ModDamageTypes;
+import com.tacz.guns.network.message.ClientMessagePlayerShoot;
+import com.tacz.guns.sound.SoundManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import com.mojang.authlib.GameProfile;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.embedded.EmbeddedChannel;
 import net.minecraft.network.Connection;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.PacketSendListener;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketFlow;
+import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.network.CommonListenerCookie;
+import net.minecraft.server.network.ConfigurationTask;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceLocation;
@@ -35,19 +45,28 @@ import net.minecraft.world.entity.animal.Cow;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.fml.LogicalSide;
 import net.neoforged.fml.ModList;
 import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.common.extensions.ICommonPacketListener;
 import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
 import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
+import org.jetbrains.annotations.Nullable;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
-/** Actual pinned port API, with no production compatibility changes or fire bypasses. */
+/**
+ * Actual pinned port API against production Ghost Core, including its #11 TaCZ fire guard.
+ * No test bypasses shooting, damage or collision checks.
+ */
 @PrefixGameTestTemplate(false)
 public final class TaczExperimentTests {
     private static final ResourceLocation GUN = ResourceLocation.parse("tacz:ak47");
@@ -56,6 +75,11 @@ public final class TaczExperimentTests {
     private TaczExperimentTests() {}
 
     private static ServerPlayer operator(GameTestHelper helper) {
+        return operator(helper, null);
+    }
+
+    /** With {@code syncs}, the sink also claims Ghost Core's channel and records every Ghost sync it is sent. */
+    private static ServerPlayer operator(GameTestHelper helper, @Nullable List<GhostSyncPayload> syncs) {
         // The legacy helper hardcodes isCreative=true and places an unnegotiated
         // connection through login (TaCZ's gun-pack sync throws there). Create
         // a real survival ServerPlayer in the level without claiming a login test.
@@ -71,6 +95,14 @@ public final class TaczExperimentTests {
                 // Headless packet sink only: TaCZ also sends a base timestamp on level join.
                 // This does not measure negotiation/client delivery. E1 keeps the original
                 // eight tests unadapted so their raw networking incompatibility remains visible.
+                if (syncs != null && packet instanceof ClientboundCustomPayloadPacket custom
+                        && custom.payload() instanceof GhostSyncPayload sync) syncs.add(sync);
+            }
+
+            @Override
+            public boolean hasChannel(ResourceLocation id) {
+                // Only Ghost Core's channel, so its payloads still go through GhostNetwork.send.
+                return syncs != null && id.getNamespace().equals(GhostCore.MODID);
             }
         };
         player.setGameMode(GameType.SURVIVAL);
@@ -84,9 +116,13 @@ public final class TaczExperimentTests {
     }
 
     private static ItemStack gun(GameTestHelper helper, boolean attachment) {
+        return gun(helper, attachment, true);
+    }
+
+    private static ItemStack gun(GameTestHelper helper, boolean attachment, boolean chambered) {
         helper.assertTrue(TimelessAPI.getCommonGunIndex(GUN).isPresent(), "BLOCKED: bundled AK47 index missing");
         GunItemBuilder builder = GunItemBuilder.create().setId(GUN).setAmmoCount(10)
-                .setAmmoInBarrel(true).setFireMode(FireMode.SEMI);
+                .setAmmoInBarrel(chambered).setFireMode(FireMode.SEMI);
         if (attachment) {
             helper.assertTrue(TimelessAPI.getCommonAttachmentIndex(SCOPE).isPresent(), "BLOCKED: scope index missing");
             builder.putAttachment(AttachmentType.SCOPE, SCOPE);
@@ -130,6 +166,107 @@ public final class TaczExperimentTests {
         // Keep the normal timestamp/network/ammo checks enabled.
         return operator.shoot(player::getXRot, player::getYRot,
                 System.currentTimeMillis() - operator.getDataHolder().baseTimestamp, 0F);
+    }
+
+    /** What a client that ignores its fire guard sends: wire-encoded, decoded, then the port's own handler. */
+    private static ShootResult firePacket(GameTestHelper helper, ServerPlayer player, IGunOperator operator) {
+        ClientMessagePlayerShoot sent = new ClientMessagePlayerShoot(
+                System.currentTimeMillis() - operator.getDataHolder().baseTimestamp, 0F);
+        RegistryFriendlyByteBuf wire = new RegistryFriendlyByteBuf(Unpooled.buffer(), helper.getLevel().registryAccess());
+        ClientMessagePlayerShoot.STREAM_CODEC.encode(wire, sent);
+        ClientMessagePlayerShoot.handle(ClientMessagePlayerShoot.STREAM_CODEC.decode(wire), new ServerThreadContext(player));
+        return null; // the handler discards the result; bullets, ammo and sound are measured instead
+    }
+
+    /** Runs enqueued handler work at once: GameTests already run on the server thread. */
+    private record ServerThreadContext(ServerPlayer player) implements IPayloadContext {
+        @Override
+        public ICommonPacketListener listener() {
+            return player.connection;
+        }
+
+        @Override
+        public CompletableFuture<Void> enqueueWork(Runnable task) {
+            task.run();
+            return CompletableFuture.completedFuture(null);
+        }
+
+        @Override
+        public <T> CompletableFuture<T> enqueueWork(Supplier<T> task) {
+            return CompletableFuture.completedFuture(task.get());
+        }
+
+        @Override
+        public PacketFlow flow() {
+            return PacketFlow.SERVERBOUND;
+        }
+
+        @Override
+        public void handle(CustomPacketPayload payload) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void finishCurrentTask(ConfigurationTask.Type type) {
+            throw new UnsupportedOperationException();
+        }
+    }
+
+    private record Shot(@Nullable ShootResult result, int bullets, int ammoBefore, int ammoAfter, List<String> sounds) {
+        boolean nothingHappened() {
+            return bullets == 0 && ammoBefore == ammoAfter && sounds.isEmpty();
+        }
+
+        boolean realShot() {
+            return result == ShootResult.SUCCESS && bullets == 1 && ammoAfter == ammoBefore - 1
+                    && sounds.contains(SoundManager.SHOOT_3P_SOUND);
+        }
+
+        @Override
+        public String toString() {
+            return "result=" + (result == null ? "n/a (packet handler)" : result) + ", spawnedBullets=" + bullets
+                    + ", totalAmmo=" + ammoBefore + "->" + ammoAfter + ", serverSoundDispatch=" + sounds;
+        }
+    }
+
+    /** Counts the shooter's real bullets, total loaded ammo and server sound dispatch around one fire attempt. */
+    private static Shot measure(ServerPlayer player, ItemStack gun, Supplier<ShootResult> attempt) {
+        int before = ammo(gun);
+        AtomicInteger bullets = new AtomicInteger();
+        List<String> sounds = new ArrayList<>();
+        Consumer<EntityJoinLevelEvent> observer = event -> {
+            if (event.getEntity() instanceof EntityKineticBullet bullet && bullet.getOwner() == player) bullets.incrementAndGet();
+        };
+        NeoForge.EVENT_BUS.addListener(EntityJoinLevelEvent.class, observer);
+        SoundEvidence.observer = (source, sound) -> {
+            if (source == player) sounds.add(sound);
+        };
+        ShootResult result;
+        try {
+            result = attempt.get();
+        } finally {
+            NeoForge.EVENT_BUS.unregister(observer);
+            SoundEvidence.observer = null;
+        }
+        return new Shot(result, bullets.get(), before, ammo(gun), sounds);
+    }
+
+    /** Waits for Ghost Core's own tick to revive the player, then runs {@code then}. */
+    private static void afterRevive(GameTestHelper helper, GhostData data, Runnable then) {
+        long wait = data.downedUntil - helper.getLevel().getGameTime() + 2;
+        helper.runAfterDelay(Math.max(1, wait), () -> {
+            helper.assertTrue(!data.isDowned(), "BLOCKED: player was not revived on schedule");
+            then.run();
+        });
+    }
+
+    /** The latest Ghost sync as the client decodes it: the only input to the client's fire guard. */
+    @Nullable
+    private static GhostSyncPayload lastReceived(List<GhostSyncPayload> syncs) {
+        if (syncs.isEmpty()) return null;
+        FriendlyByteBuf wire = new FriendlyByteBuf(Unpooled.buffer());
+        GhostSyncPayload.STREAM_CODEC.encode(wire, syncs.get(syncs.size() - 1));
+        return GhostSyncPayload.STREAM_CODEC.decode(wire);
     }
 
     private static void pass(GameTestHelper helper, String id, String evidence) {
@@ -179,42 +316,72 @@ public final class TaczExperimentTests {
         });
     }
 
-    @GameTest(template = "platform", templateNamespace = GhostCore.MODID, timeoutTicks = 200)
-    public static void e4DownedPlayerCannotFire(GameTestHelper helper) {
-        ServerPlayer player = operator(helper);
+    // #11 regression for #10's E4 FAIL (SUCCESS, 1 bullet, 11->10, shoot_3p while downed).
+    @GameTest(template = "platform", templateNamespace = GhostCore.MODID, timeoutTicks = 300)
+    public static void e4DownedPlayerCannotFireUntilRevived(GameTestHelper helper) {
+        List<GhostSyncPayload> syncs = new ArrayList<>();
+        ServerPlayer player = operator(helper, syncs);
         ItemStack gun = gun(helper, false);
         IGunOperator operator = draw(helper, player, gun);
         helper.runAfterDelay(75, () -> {
             ready(helper, operator);
             GhostData data = down(helper, player);
-            int before = ammo(gun);
-            AtomicInteger bullets = new AtomicInteger();
-            List<String> sounds = new ArrayList<>();
-            Consumer<EntityJoinLevelEvent> observer = event -> {
-                if (event.getEntity() instanceof EntityKineticBullet bullet && bullet.getOwner() == player) bullets.incrementAndGet();
-            };
-            NeoForge.EVENT_BUS.addListener(observer);
-            SoundEvidence.observer = (source, sound) -> {
-                if (source == player) sounds.add(sound);
-            };
-            ShootResult result;
-            try {
-                result = fire(player, operator);
-            } finally {
-                NeoForge.EVENT_BUS.unregister(observer);
-                SoundEvidence.observer = null;
-            }
+            Shot entrypoint = measure(player, gun, () -> fire(player, operator));
+            Shot packet = measure(player, gun, () -> firePacket(helper, player, operator));
+            // Burst cycles post GunFireEvent before ammo, bullets and sound; the guard must cancel it too.
+            boolean cycleCancelled = NeoForge.EVENT_BUS.post(new GunFireEvent(player, gun, LogicalSide.SERVER)).isCanceled();
             helper.assertTrue(data.isDowned(), "BLOCKED: player revived before measurement");
-            int after = ammo(gun);
-            String evidence = "result=" + result + ", spawnedBullets=" + bullets.get() + ", totalAmmo=" + before + "->" + after
-                    + ", serverSoundDispatch=" + sounds + "; client playback not measured in headless GameTest";
-            String outcome = bullets.get() > 0 || before != after ? "FAIL"
-                    : result == ShootResult.FORGE_EVENT_CANCEL ? "PASS" : "BLOCKED";
-            GhostCore.LOGGER.info("ISSUE10 E4 {}: {}", outcome, evidence);
-            helper.assertTrue(bullets.get() == 0 && before == after, "E4 FAIL: " + evidence);
+            String downed = "entrypoint[" + entrypoint + "], decodedPacket[" + packet + "], serverGunFireEventCancelled=" + cycleCancelled;
+            GhostCore.LOGGER.info("ISSUE11 E4 downed: {}", downed);
+            helper.assertTrue(entrypoint.nothingHappened() && packet.nothingHappened(), "E4 FAIL: downed player fired: " + downed);
             // A normal precondition rejection cannot prove downed-state blocking.
-            helper.assertTrue(result == ShootResult.FORGE_EVENT_CANCEL, "BLOCKED: unrelated fire rejection: " + result);
-            helper.succeed();
+            helper.assertTrue(entrypoint.result() == ShootResult.FORGE_EVENT_CANCEL, "BLOCKED: unrelated fire rejection: " + downed);
+            helper.assertTrue(cycleCancelled, "E4 FAIL: server GunFireEvent not cancelled while downed");
+
+            helper.runAfterDelay(2, () -> {
+                // The client guard's only input: the Ghost sync the server sends through GhostNetwork.send.
+                GhostSyncPayload sync = lastReceived(syncs);
+                helper.assertTrue(data.isDowned() && sync != null && sync.isDowned(),
+                        "E4 FAIL: synced client state does not show downed: " + sync);
+                afterRevive(helper, data, () -> {
+                    GhostSyncPayload revivedSync = lastReceived(syncs);
+                    helper.assertTrue(revivedSync != null && !revivedSync.isDowned(),
+                            "E4 FAIL: synced client state still downed after revive: " + revivedSync);
+                    Shot revived = measure(player, gun, () -> fire(player, operator));
+                    String evidence = downed + "; syncDowned=true->false (" + syncs.size() + " syncs); revived[" + revived
+                            + "]; client playback not measured in headless GameTest";
+                    GhostCore.LOGGER.info("ISSUE11 E4 {}: {}", revived.realShot() ? "PASS" : "FAIL", evidence);
+                    helper.assertTrue(revived.realShot(), "E4 FAIL: firing did not resume after revive: " + evidence);
+                    helper.succeed();
+                });
+            });
+        });
+    }
+
+    // TaCZ chambers a closed-bolt round before posting GunShootEvent: the round moves, nothing is spent or fired.
+    @GameTest(template = "platform", templateNamespace = GhostCore.MODID, timeoutTicks = 300)
+    public static void e7DownedClosedBoltEmptyChamberSpendsNothing(GameTestHelper helper) {
+        ServerPlayer player = operator(helper);
+        ItemStack gun = gun(helper, false, false);
+        IGun api = IGun.getIGunOrNull(gun);
+        IGunOperator operator = draw(helper, player, gun);
+        helper.runAfterDelay(75, () -> {
+            ready(helper, operator);
+            helper.assertTrue(!api.hasBulletInBarrel(gun) && api.getCurrentAmmoCount(gun) == 10,
+                    "BLOCKED: fixture must start with an empty chamber and ten magazine rounds");
+            GhostData data = down(helper, player);
+            Shot downed = measure(player, gun, () -> fire(player, operator));
+            String split = "magazine=" + api.getCurrentAmmoCount(gun) + ", chambered=" + api.hasBulletInBarrel(gun);
+            GhostCore.LOGGER.info("ISSUE11 E7 downed: {}, {}", downed, split);
+            helper.assertTrue(downed.nothingHappened(), "E7 FAIL: downed closed-bolt attempt spent or fired: " + downed + ", " + split);
+            helper.assertTrue(downed.result() == ShootResult.FORGE_EVENT_CANCEL, "BLOCKED: unrelated fire rejection: " + downed);
+            afterRevive(helper, data, () -> {
+                Shot revived = measure(player, gun, () -> fire(player, operator));
+                String evidence = "downed[" + downed + ", " + split + "]; revived[" + revived + "]";
+                GhostCore.LOGGER.info("ISSUE11 E7 {}: {}", revived.realShot() ? "PASS" : "FAIL", evidence);
+                helper.assertTrue(revived.realShot(), "E7 FAIL: firing did not resume after revive: " + evidence);
+                helper.succeed();
+            });
         });
     }
 
