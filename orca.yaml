@@ -1,0 +1,5 @@
+# Windows setup hooks run through cmd.exe. Warm compilation only.
+scripts:
+  setup: |
+    cd /d mods\ghostcore
+    .\gradlew.bat compileJava
