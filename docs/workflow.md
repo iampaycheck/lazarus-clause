@@ -11,7 +11,7 @@ Issues carry a difficulty label, not a model. This table maps labels to models, 
 | `tier:hard`: new custom-mod systems, hard bugs (rendering, networking, worldgen, perf), big design calls | Opus 5.5, xhigh |
 | `tier:standard`: routine mod changes, pack work, configs, KubeJS, docs, lore | **GPT 6.1 Sol** (Codex), high, in Orca |
 | Read-and-report helpers: `mod-scout` (Haiku, high), `log-triage` (Haiku, xhigh) | Sol calls them through `claude -p` (below) |
-| File-changing helpers: `pack-builder` (Sonnet, high), `mod-implementer` (Sonnet, xhigh) | Orca child workspaces, one worktree each |
+| File-changing helpers: `pack-builder` (Sonnet, high), `mod-implementer` (Sonnet, xhigh) | Orca child workspaces, one short Git-created worktree each (setup below) |
 | Review before merge | The reviewer must be a different model from the author: Sol reviews Claude-written code (medium), and `mod-reviewer` (Sonnet, xhigh) reviews Sol-written code |
 
 Codex has the most usage headroom, so Sol does the bulk of the work. Claude is kept for `tier:hard` work and the cheap Haiku/Sonnet helpers.
@@ -65,7 +65,7 @@ The repo is registered in Orca at `C:\Users\teddy\Documents\GitHub\lazarus-claus
 
 1. Run `git config --global core.longpaths true` (centrifuge machine bootstrap).
 2. Run `orca repo add --path C:\Users\teddy\Documents\GitHub\lazarus-clause`.
-3. The root `orca.yaml` supplies `scripts.setup`: `cd /d mods\ghostcore`, then `.\gradlew.bat compileJava`. Orca runs Windows hooks through `cmd.exe` and stops on a failed command. This warms Gradle without starting a server. Never use bare `.sh` hooks on Windows. Java 21 is the mod's toolchain; Gradle can provision it through the configured Foojay resolver.
+3. The root `orca.yaml` supplies `scripts.setup`: `cd /d mods\ghostcore`, then `.\gradlew.bat compileJava`. Orca runs Windows hooks through `cmd.exe`. This warms Gradle without starting a server. Never use bare `.sh` hooks on Windows. Java 21 is the mod's toolchain; Gradle can provision it through the configured Foojay resolver.
 4. Create short issue worktrees from the registered repo, then expose them in Orca:
 
    ```powershell
@@ -76,7 +76,15 @@ The repo is registered in Orca at `C:\Users\teddy\Documents\GitHub\lazarus-claus
    orca worktree set --worktree path:C:\w\lc\<issue> --issue <issue> --json
    ```
 
-   Orca discovers these Git worktrees; `repo add` is only needed once for the main checkout. For manually created worktrees, run the setup command from the worktree root: `cmd /d /c "cd /d mods\ghostcore && .\gradlew.bat compileJava"`. Then run `.\gradlew.bat build` and `.\gradlew.bat runGameTestServer` from `mods\ghostcore` before opening a PR. Do not use an Orca-created checkout until its configured workspace root is short enough.
+   Orca discovers these Git worktrees; `repo add` is only needed once for the main checkout. Run the setup command from the worktree root: `cmd /d /c "cd /d mods\ghostcore && .\gradlew.bat compileJava"`. Then run `.\gradlew.bat build` and `.\gradlew.bat runGameTestServer` from `mods\ghostcore` before opening a PR.
 
-5. Give each child workspace one issue and one PR. Follow centrifuge's child-workspace doctrine for seat limits and sign-off. The Minecraft/NeoForm cache in `~/.gradle` is shared, so a new worktree's first build skips the ~3-minute Minecraft setup.
+5. Use step 4 for child workspaces too; `orca worktree create` currently chooses a deep default path and is not the creation procedure for this repo. Link the short child to its existing parent, then launch its helper in that checkout:
+
+   ```powershell
+   orca worktree set --worktree path:C:\w\lc\<child-issue> --parent-worktree path:C:\w\lc\<parent-issue> --json
+   orca terminal create --worktree path:C:\w\lc\<child-issue> --command "claude --agent mod-implementer --model sonnet --effort xhigh" --json
+   ```
+
+   For pack work use `pack-builder`, Sonnet, high instead. Give each child one issue and one PR. Follow centrifuge's child-workspace doctrine for seat limits and sign-off. The Minecraft/NeoForm cache in `~/.gradle` is shared, so a new worktree's first build skips the ~3-minute Minecraft setup.
+
 6. Codex reads `AGENTS.md`, and Claude Code reads it through `CLAUDE.md`. Keep shared rules in `AGENTS.md` only.

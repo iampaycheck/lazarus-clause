@@ -21,7 +21,7 @@ A dystopian sci-fi looter-shooter modpack for Minecraft **1.21.1** (NeoForge).
 pack/            the modpack, managed with packwiz (mod list, configs, versions)
 mods/ghostcore/  Ghost Core: the foundational custom mod (your Ghost companion)
 .github/         CI builds every custom mod and runs its GameTests on each push
-docs/workflow.md how work gets done: models, effort, one issue per session, Orca plan
+docs/workflow.md how work gets done: models, effort, one issue per session, Orca setup
 .claude/agents/  project subagents (Haiku scouts and log triage, Sonnet builders and reviewers)
 ```
 
