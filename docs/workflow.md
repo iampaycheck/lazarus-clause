@@ -6,15 +6,15 @@ The goal is high quality without burning usage. Expensive models handle judgment
 
 Issues carry a difficulty label, not a model. This table maps labels to models, so a model change is one edit here and no relabelling.
 
-| Work | Now (Claude Code) | After the Orca move (#2) |
-|---|---|---|
-| `tier:hard`: new custom-mod systems, hard bugs (rendering, networking, worldgen, perf), big design calls | Opus 5.5, xhigh | Opus 5.5, xhigh |
-| `tier:standard`: routine mod changes, pack work, configs, KubeJS, docs, lore | Sonnet 5.5, high | **GPT 6.1 Sol** (Codex), high |
-| Read-and-report helpers: `mod-scout` (Haiku, high), `log-triage` (Haiku, xhigh) | Agent tool | Sol calls them through `claude -p` (below) |
-| File-changing helpers: `pack-builder` (Sonnet, high), `mod-implementer` (Sonnet, xhigh) | Agent tool | Orca child workspaces, one worktree each |
-| Review before merge | `mod-reviewer` (Sonnet, xhigh) | The reviewer must be a different model from the author: Sol reviews Claude-written code (medium), and `mod-reviewer` reviews Sol-written code |
+| Work | Model and execution |
+|---|---|
+| `tier:hard`: new custom-mod systems, hard bugs (rendering, networking, worldgen, perf), big design calls | Opus 5.5, xhigh |
+| `tier:standard`: routine mod changes, pack work, configs, KubeJS, docs, lore | **GPT 6.1 Sol** (Codex), high, in Orca |
+| Read-and-report helpers: `mod-scout` (Haiku, high), `log-triage` (Haiku, xhigh) | Sol calls them through `claude -p` (below) |
+| File-changing helpers: `pack-builder` (Sonnet, high), `mod-implementer` (Sonnet, xhigh) | Orca child workspaces, one worktree each |
+| Review before merge | The reviewer must be a different model from the author: Sol reviews Claude-written code (medium), and `mod-reviewer` (Sonnet, xhigh) reviews Sol-written code |
 
-Why it shifts after Orca: Codex has the most usage headroom, so Sol does the bulk of the work. Claude is kept for `tier:hard` work and the cheap Haiku/Sonnet helpers.
+Codex has the most usage headroom, so Sol does the bulk of the work. Claude is kept for `tier:hard` work and the cheap Haiku/Sonnet helpers.
 
 Rules of thumb:
 - xhigh is the default ceiling. Use `max` only when the owner says so for that task.
@@ -30,6 +30,8 @@ claude -p --agent mod-reviewer --model sonnet --effort xhigh "Review this branch
 ```
 
 Agent definitions live in `.claude/agents/`. `--agent` loads the definition's prompt and tools; `--model` and `--effort` restate the choice explicitly.
+
+Run helpers from the issue worktree so they find `.claude/agents/` and `CLAUDE.md`. If a helper reports an expired OAuth session, run `claude auth login` and retry; Orca's Codex login does not authenticate the standalone Claude CLI.
 
 ## Session protocol
 
@@ -57,13 +59,24 @@ Agent definitions live in `.claude/agents/`. `--agent` loads the definition's pr
 
 The effort in each agent's file is its standing setting. Override it on a spawn when the task warrants it, and say so.
 
-## Moving into Orca (#2)
+## Orca workspace setup
 
-Do this when two or more independent issues are ready at the same time, or sooner if Claude usage is tight. The move is what makes Sol the main model.
+The repo is registered in Orca at `C:\Users\teddy\Documents\GitHub\lazarus-clause`. Keep issue worktrees under `C:\w\lc`; Orca's default workspace path is too deep for NeoForge. This is a machine setting and checkout convention, not a path stored in `orca.yaml`.
 
 1. Run `git config --global core.longpaths true` (centrifuge machine bootstrap).
 2. Run `orca repo add --path C:\Users\teddy\Documents\GitHub\lazarus-clause`.
-3. Commit a root `orca.yaml` whose `scripts.setup` warms Gradle (`cd mods/ghostcore` then `.\gradlew.bat compileJava`). Never start a server there, and don't use bare `.sh` hooks on Windows.
-4. Put worktrees on a **short** root such as `C:\w\lc\<issue>`, because NeoForge breaks in deep paths. Create them with `git worktree add -b <branch> C:\w\lc\<issue> origin/main`, then register them with Orca.
+3. The root `orca.yaml` supplies `scripts.setup`: `cd /d mods\ghostcore`, then `.\gradlew.bat compileJava`. Orca runs Windows hooks through `cmd.exe` and stops on a failed command. This warms Gradle without starting a server. Never use bare `.sh` hooks on Windows. Java 21 is the mod's toolchain; Gradle can provision it through the configured Foojay resolver.
+4. Create short issue worktrees from the registered repo, then expose them in Orca:
+
+   ```powershell
+   git fetch origin
+   git worktree add -b <issue>-<slug> C:\w\lc\<issue> origin/main
+   orca repo set --repo path:C:\Users\teddy\Documents\GitHub\lazarus-clause --external-worktree-visibility show --json
+   orca worktree show --worktree path:C:\w\lc\<issue> --json
+   orca worktree set --worktree path:C:\w\lc\<issue> --issue <issue> --json
+   ```
+
+   Orca discovers these Git worktrees; `repo add` is only needed once for the main checkout. For manually created worktrees, run the setup command from the worktree root: `cmd /d /c "cd /d mods\ghostcore && .\gradlew.bat compileJava"`. Then run `.\gradlew.bat build` and `.\gradlew.bat runGameTestServer` from `mods\ghostcore` before opening a PR. Do not use an Orca-created checkout until its configured workspace root is short enough.
+
 5. Give each child workspace one issue and one PR. Follow centrifuge's child-workspace doctrine for seat limits and sign-off. The Minecraft/NeoForm cache in `~/.gradle` is shared, so a new worktree's first build skips the ~3-minute Minecraft setup.
 6. Codex reads `AGENTS.md`, and Claude Code reads it through `CLAUDE.md`. Keep shared rules in `AGENTS.md` only.
