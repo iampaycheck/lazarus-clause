@@ -27,6 +27,7 @@ These rules apply to every agent and model (Claude Code reads them through `CLAU
 ## Gotchas
 - Windows MAX_PATH: NeoForge's setup fails when a working dir passes 260 chars. Keep checkouts and worktrees in short paths and set `git config core.longpaths true`.
 - GameTest mock players aren't ticked (use `helper.onEachTick(player::doTick)`), are in creative, and drop about 1 block in their first ticks.
+- In 21.1.256, `makeMockServerPlayerInLevel()` hardcodes `isCreative()` to true: `setGameMode(SURVIVAL)` alone does not enable survival ammo consumption. Construct a survival `ServerPlayer` for ammo tests; record any login bypass separately from compatibility results.
 - `RenderLevelStageEvent` (1.21.1): set the model-view matrix yourself before drawing (see `ScanHighlights`).
 - `pack/**` is LF-only, because packwiz hashes break on CRLF.
 

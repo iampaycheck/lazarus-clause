@@ -1,0 +1,8 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.iampaycheck.ghostcore.gametest.tacz.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": ["SoundEvidenceMixin"],
+  "injectors": {"defaultRequire": 1}
+}
