@@ -1,1 +1,26 @@
 hash-format = "sha256"
+
+[[files]]
+file = "mods/ferrite-core.pw.toml"
+hash = "b4bbe1023e3adb39173823599788b7cb04e6ac550aa488dd0aa74cbc10571e79"
+metafile = true
+
+[[files]]
+file = "mods/jade.pw.toml"
+hash = "f946c73b5ae38c683cacf4b3c58a926d3a07a2983951da65d4aef1982e895219"
+metafile = true
+
+[[files]]
+file = "mods/jei.pw.toml"
+hash = "c9397d739e667b9cafa27e1c260ddc35faba4400f949ff49d8e15bd6faeb8d48"
+metafile = true
+
+[[files]]
+file = "mods/lithium.pw.toml"
+hash = "ef842fc888ebc2f69b632fffbcde27ea26bea889cd2a77f6ab967a8343f70a8a"
+metafile = true
+
+[[files]]
+file = "mods/sodium.pw.toml"
+hash = "fd7473a15dd771e7a7f53159840799afffc62dda2abc4ee95d7ee0cbeac569b2"
+metafile = true
