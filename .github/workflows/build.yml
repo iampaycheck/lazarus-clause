@@ -6,6 +6,36 @@ on:
   pull_request:
 
 jobs:
+  pack-baseline:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version: '1.27.2'
+          cache: false
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.14'
+      - name: Install pinned packwiz
+        env:
+          GOBIN: ${{ github.workspace }}/.gradle/issue4/tools/bin
+        run: go install github.com/packwiz/packwiz@ef87d964f8cbd52b3b13ea42453ef322290e2b9e
+      - name: Refresh and export baseline
+        working-directory: pack
+        run: |
+          mkdir -p ../.gradle/issue4/output
+          ../.gradle/issue4/tools/bin/packwiz --cache ../.gradle/issue4/packwiz-cache refresh
+          git diff --exit-code -- .
+          ../.gradle/issue4/tools/bin/packwiz --cache ../.gradle/issue4/packwiz-cache modrinth export --output ../.gradle/issue4/output/lazarus-clause-0.1.0.mrpack
+      - name: Verify metadata, sides, archive and remote hashes
+        run: python scripts/verify-pack.py .gradle/issue4/output/lazarus-clause-0.1.0.mrpack --download --report .gradle/issue4/output/verification.json
+      - uses: actions/upload-artifact@v7
+        with:
+          name: pack-baseline
+          path: .gradle/issue4/output/
+          include-hidden-files: true
+
   ghostcore:
     runs-on: ubuntu-latest
     defaults:

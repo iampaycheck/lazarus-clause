@@ -33,8 +33,9 @@ The Ghost floats at your shoulder. It **resurrects** you on lethal damage (limit
 
 ## Playtesting
 
-1. In Prism Launcher, create an instance with Minecraft 1.21.1 and NeoForge 21.1.256 or newer.
-2. Download `ghostcore` from the latest [Build workflow run](../../actions/workflows/build.yml) (under Artifacts) or build it locally, then add the jar under Edit → Mods.
+Import the baseline `.mrpack` into a **new** Prism instance: Minecraft **1.21.1**, NeoForge **21.1.256**, Java **21**. See [baseline setup, export and owner checklist](docs/pack-baseline.md) for the exact artifact path, pinned mod versions and log locations. Client launch acceptance is **PENDING owner playtest**.
+
+Ghost Core is a separate, optional integration step: download `ghostcore` from the latest [Build workflow run](../../actions/workflows/build.yml) (under Artifacts) or build it locally, then add the jar under Edit → Mods. The baseline export does not include Ghost Core; a hosted release is needed before packwiz can distribute it.
 
 ## Developing
 
@@ -49,14 +50,24 @@ Requires a JDK that can run Gradle 9 (17+). Gradle downloads Java 21 for compili
 
 ### Managing the pack
 
-Install [packwiz](https://packwiz.infra.link/), then run from `pack/`:
+From the repository root in PowerShell, install the pinned packwiz build locally (Windows x64):
 
-```bash
-packwiz modrinth add <mod>     # or: packwiz curseforge add <mod>
-packwiz refresh
+```powershell
+$ErrorActionPreference = 'Stop'
+.\scripts\install-packwiz.ps1
+New-Item -ItemType Directory -Force .gradle/issue4/output | Out-Null
+Push-Location pack
+try {
+    & ../.gradle/issue4/tools/bin/packwiz.exe --cache ../.gradle/issue4/packwiz-cache refresh
+    if ($LASTEXITCODE -ne 0) { throw 'Refresh failed' }
+    & ../.gradle/issue4/tools/bin/packwiz.exe --cache ../.gradle/issue4/packwiz-cache modrinth export --output ../.gradle/issue4/output/lazarus-clause-0.1.0.mrpack
+    if ($LASTEXITCODE -ne 0) { throw 'Export failed' }
+} finally { Pop-Location }
+python scripts/verify-pack.py .gradle/issue4/output/lazarus-clause-0.1.0.mrpack --download --report .gradle/issue4/output/verification.json
+if ($LASTEXITCODE -ne 0) { throw 'Verification failed' }
 ```
 
-Ghost Core gets added to the pack once CI publishes release builds.
+The installer pins Go and packwiz, verifies the Go archive checksum, and restores its process environment. All tools, caches and exports stay under ignored `.gradle/issue4/`; no persistent PATH changes. Verification requires Python 3.11+. [Full instructions and sources](docs/pack-baseline.md) include uninstalling and rebuilding the exact selection. Change `pack/` with packwiz; keep its files LF-only and never edit hashes manually.
 
 ## License
 
