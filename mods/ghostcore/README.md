@@ -67,9 +67,9 @@ original model geometry embedded in source versus MIT rendering code.
 The jar contains `LICENSE` and `LICENSE-SCOPE.md` at its root; its mod metadata
 states this split. Third-party code, dependencies and assets retain their own
 terms and notices, including Minecraft, NeoForge and optional TaCZ content.
-Merging the licensing PR resolves the project's own license-policy dependency
-for a first public release; it does not resolve third-party distribution checks
-or the [TaCZ license and asset review](../../docs/tacz-license-terms.md).
+The project's own license policy is settled (#7). Release integration remains
+separate under #5, including third-party distribution checks and the
+[TaCZ license and asset review](../../docs/tacz-license-terms.md) before any public release.
 
 ### Build and tests
 
