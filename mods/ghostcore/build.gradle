@@ -186,6 +186,13 @@ sourceSets.main.resources.srcDir generateModMetadata
 // To avoid having to run "generateModMetadata" manually, make it run on every project reload
 neoForge.ideSyncTask generateModMetadata
 
+// Ship the exact repository license and its scope notice alongside the generated metadata.
+tasks.named('processResources', ProcessResources) {
+    from('../../') {
+        include 'LICENSE', 'LICENSE-SCOPE.md'
+    }
+}
+
 // Example configuration to allow publishing using the maven-publish plugin
 publishing {
     publications {

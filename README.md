@@ -71,4 +71,15 @@ The installer pins Go and packwiz, verifies the Go archive checksum, and restore
 
 ## License
 
-All rights reserved for now.
+Original project code and documentation associated with it are licensed under
+the [MIT License](LICENSE). Original models, textures, audio and other artistic
+assets have all rights reserved separately for now; the code license grants no
+general reuse rights to those assets. See [license scope and asset notice](LICENSE-SCOPE.md),
+including the distinction between model geometry and rendering code.
+
+Third-party mods, dependencies and assets retain their own licenses and notices;
+this policy does not relicense TaCZ or any other third-party material. It records
+the [owner's decision for #7](https://github.com/iampaycheck/lazarus-clause/issues/7#issuecomment-6116554739).
+The project's own license policy is settled (#7). Release integration remains
+separate under #5, including third-party distribution checks and the
+[TaCZ license and asset review](docs/tacz-license-terms.md) before any public release.

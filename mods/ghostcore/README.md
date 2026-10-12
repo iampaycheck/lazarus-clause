@@ -6,7 +6,7 @@ The foundational mod of [Lazarus Clause](../../README.md), a dystopian sci-fi lo
 > It keeps you alive, but not out of kindness. Your contract says your body is Company property,
 > and every resurrection is logged against what you owe.
 
-Inspired by Destiny's Ghost. The name and role are kept, but the lore, shell design and art are original, so the pack can be published.
+Inspired by Destiny's Ghost, with project-specific lore and shell design.
 
 ## Features
 
@@ -55,6 +55,23 @@ NeoForge.EVENT_BUS.addListener((GhostReviveEvent e) -> {
 KubeJS can hook the same event through `NativeEvents`. All player-facing text is in `assets/ghostcore/lang/en_us.json`, so the pack can rewrite the lore through a resource pack.
 
 ## Development
+
+### License
+
+Original Ghost Core code and documentation associated with it use the
+[MIT License](../../LICENSE). Original models, textures, audio and other artistic
+assets have all rights reserved separately for now. The
+[scope and asset notice](../../LICENSE-SCOPE.md) explains the boundary, including
+original model geometry embedded in source versus MIT rendering code.
+
+The jar contains `LICENSE` and `LICENSE-SCOPE.md` at its root; its mod metadata
+states this split. Third-party code, dependencies and assets retain their own
+terms and notices, including Minecraft, NeoForge and optional TaCZ content.
+The project's own license policy is settled (#7). Release integration remains
+separate under #5, including third-party distribution checks and the
+[TaCZ license and asset review](../../docs/tacz-license-terms.md) before any public release.
+
+### Build and tests
 
 ```bash
 ./gradlew build                # jar in build/libs/
