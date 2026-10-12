@@ -14,13 +14,19 @@ Inspired by Destiny's Ghost. The name and role are kept, but the lore, shell des
 |---|---|
 | **Companion** | A drone floats over your right shoulder and follows you smoothly. When it works, its shell spreads open and orbits its glowing lens. Other players can see it. |
 | **Resurrection** | Lethal damage leaves you *downed* instead of dead. For a few seconds you're rooted and invulnerable while the Ghost restores you. Each revive spends a charge (3 max, one regenerates every 5 min). With no charges left, death is real. Void, lava and suffocation deaths pull you back to the last safe ground you stood on. If the optional TaCZ gun port is installed, a downed operator can't fire either. |
-| **Scan** (`G`) | A sonar ring sweeps outward and x-rays, through walls, **unlooted caches** (gold; containers that still have a loot table), **ore** (cyan, `c:ores` tag) and **hostiles** (red). |
+| **Scan** (`U`) | A sonar ring sweeps outward and x-rays, through walls, **unlooted caches** (gold; containers that still have a loot table), **ore** (cyan, `c:ores` tag) and **hostiles** (red). |
 | **Light** (`K`) | In the dark, the Ghost carries an invisible light block with it. These light blocks delete themselves once no Ghost claims them, so crashes and chunk unloads never leave stray lights behind. |
-| **Transmat** (`H`) | Right-click a **Transmat Beacon** to link it. Press `H` and hold still for 3 s to teleport there, including across dimensions. Moving or taking damage cancels it. 5 min cooldown. |
+| **Transmat** (`Y`) | Right-click a **Transmat Beacon** to link it. Press `Y` and hold still for 3 s to teleport there, including across dimensions. Moving or taking damage cancels it. 5 min cooldown. |
 | **Ghost Cache** (`J`) | 9 slots of storage the Ghost keeps for you. It follows you everywhere and survives death. |
 | **HUD** | A top-left panel shows charges, scan and transmat cooldowns, and a distance/bearing arrow to your beacon. Full-screen overlays appear while you're downed or channeling a transmat. |
 
 New players get a **Ghost Shell** on first join and use it to bind (configurable).
+
+The keys above are defaults; remap them in Minecraft's **Options → Controls → Key Binds**.
+Scan uses `U` and transmat uses `Y` to avoid the TaCZ r7 defaults (`G` for fire-mode
+selection, `H` for gun inspection). Updates preserve saved bindings: existing players
+with scan on `G` or transmat on `H` must manually remap those Ghost Core actions to
+`U` and `Y` in Controls. Ghost Cache (`J`) and Light (`K`) are unchanged.
 
 ## Config
 

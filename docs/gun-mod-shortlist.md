@@ -156,7 +156,7 @@ Paths are under `mods/ghostcore/src/main/java/com/iampaycheck/ghostcore/`. NeoFo
 | Scan: hostiles | Marks `LivingEntity` that `instanceof Enemy` (`ghost/Scanner.java:55-57`). | Gun-mod turrets, vehicles or armed mobs show red only if they implement `Enemy`. Bullet entities are not `LivingEntity`, so they never show. | Unverified per addon |
 | Scan: caches | Marks any `RandomizableContainer` with a loot table (`Scanner.java:70`). | Guns or ammo placed in loot tables show up as gold caches with no Ghost Core change. A gun mod's own crates only show if they use that interface. | Verified for vanilla containers |
 | Scan rendering | Draws at `AFTER_LEVEL` and resets the model-view matrix itself (`client/ScanHighlights.java:63, 97`). | Should survive scope FOV zoom. Scope overlays or custom first-person passes may hide the lines. | Owner playtest |
-| HUD and keys | Panel is top-left via `registerAboveAll` (`client/GhostHud.java:25`). Keys G/H/J/K (`client/GhostKeys.java:17-20`). | Gun ammo HUDs and default keys may overlap. Gun-mod defaults are unknown. | Owner playtest; key defaults are research item R7 |
+| HUD and keys | Panel is top-left via `registerAboveAll` (`client/GhostHud.java:25`). At the proposal baseline, keys were G/H/J/K (`client/GhostKeys.java:17-20`). | Gun ammo HUDs and default keys may overlap. Gun-mod defaults were unknown at that baseline. | Owner playtest; key defaults were research item R7 (resolved for TaCZ r7 below) |
 | Ghost drone in the line of fire | `GhostEntity` keeps vanilla `isPickable() == false` (`Entity.java:1667`) and ignores damage (`ghost/GhostEntity.java:164-171`). Vanilla projectiles skip non-pickable entities (`Projectile.java:257-263`). | A gun mod with its own raycast that does not filter on `isPickable` could stop bullets on your own Ghost over your right shoulder. | Unverified (E6 / playtest) |
 | Ghost Cache | Stores any `ItemStack` via `ItemStack.OPTIONAL_CODEC` (`ghost/GhostData.java:33`). | Guns with attachment or ammo data components should round-trip. | Expected; E5 confirms |
 | GameTests | Mock players have no real connection, so Ghost Core sends packets only through `GhostNetwork.send` (`network/GhostNetwork.java:22-23`). Mock players are in creative (`AGENTS.md`). | A gun mod may send packets to mock players unguarded and throw. Creative may skip ammo use. | Experiment design constraint |
@@ -244,7 +244,7 @@ These would firm up the recommendation before or during the experiment:
 - **R5.** Elite X Quality Guns: what does it add (quality or rarity tiers?), and does it have a NeoForge
   1.21.1 build?
 - **R6.** Any measured server-performance reports (spark profiles, TPS) for the TaCZ port or Superb Warfare.
-- **R7.** TaCZ port: default keybinds, to compare with Ghost Core's G/H/J/K.
+- **R7.** TaCZ port: default keybinds, originally to compare with Ghost Core's G/H/J/K.
 - **R8.** Superb Warfare: is the 1.21.1 source published, and which dependencies are required versus optional?
 - **R9.** Can a custom TaCZ gun pack be built without any of the CC BY-NC-ND default-pack files (shared
   animations, shaders, display files)?
@@ -259,8 +259,14 @@ remain unanswered. The owner's two separate 2026-10-09 answers and their limits 
 linked report and on [#9]; they do not resolve those unanswered questions or the E1 networking blocker.
 
 **Where these are tracked:** R9 and R10 in [#9]. R2 in [#10] (fire path and damage types) and [#13]. R3 and
-R5 in [#13]. R1 in [#12]. [#15] measures performance directly instead of relying on R6. R4, R7 and R8 have no
-issue; [#14] checks key conflicts in play.
+R5 in [#13]. R1 in [#12]. [#15] measures performance directly instead of relying on R6. R4 and R8 have no
+issue; [#14] checks key conflicts in play. R7 is now resolved for TaCZ r7 by
+[#22](https://github.com/iampaycheck/lazarus-clause/issues/22): its pinned input sources
+bind gun inspection to `H` (`InspectKey.java`) and fire-mode selection to `G`
+(`FireSelectKey.java`); the other keyboard defaults are `C`, `O`, `R`, `V`, `Z` and
+`Alt+T`, with mouse aim/fire. Neither `Y` nor `U` is used. Ghost Core now defaults to
+scan `U`, transmat `Y`, cache `J` and light `K`. Existing saved `G`/`H` bindings need
+manual remapping in Controls; see the [current controls](../mods/ghostcore/README.md#features).
 
 ---
 
@@ -283,7 +289,8 @@ GitHub. Each issue carries its own goal, acceptance criteria and gates.
 **Owner playtest checklist ([#14]).** Use a throwaway Prism instance (1.21.1, NeoForge 21.1.256) with the Ghost
 Core CI jar plus the candidate and its dependencies. Spend 20–30 minutes on the candidate and check:
 recoil, aim-down-sights, reload and hit feedback; firing while downed; transmat while under fire; reviving
-mid-firefight; scan pulse while scoped; the HUD panel against the ammo HUD; G/H/J/K against the gun keys;
+mid-firefight; scan pulse while scoped; the HUD panel against the ammo HUD; U/Y/J/K against the gun keys
+(manually remap any saved scan G/transmat H bindings in Controls first);
 whether your Ghost blocks your shots; FPS.
 
 ---

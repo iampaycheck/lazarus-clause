@@ -14,8 +14,8 @@ import org.lwjgl.glfw.GLFW;
 public final class GhostKeys {
     private static final String CATEGORY = "key.categories.ghostcore";
 
-    public static final KeyMapping SCAN = key("scan", GLFW.GLFW_KEY_G);
-    public static final KeyMapping TRANSMAT = key("transmat", GLFW.GLFW_KEY_H);
+    public static final KeyMapping SCAN = key("scan", GLFW.GLFW_KEY_U);
+    public static final KeyMapping TRANSMAT = key("transmat", GLFW.GLFW_KEY_Y);
     public static final KeyMapping POCKET = key("pocket", GLFW.GLFW_KEY_J);
     public static final KeyMapping LIGHT = key("light", GLFW.GLFW_KEY_K);
 
